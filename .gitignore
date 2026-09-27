@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+
+# build / cache
+dist/
+.output/
+.nitro/
+.tanstack/
+.vercel/
+.vinxi/
+*.local
+
+# logs
+*.log
+npm-debug.log*
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# editor / OS
+.DS_Store
+.idea/
+.vscode/
+Thumbs.db
+
+# sandbox / local-only
+.project_id
+.node_modules.lock
+screenshots/
+artifacts/
