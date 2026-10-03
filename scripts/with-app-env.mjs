@@ -20,12 +20,45 @@
  * `process.env`, which is why the merge has to happen before Vite starts.
  */
 import { spawn } from "node:child_process";
-import { readFileSync, realpathSync } from "node:fs";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { constants as osConstants } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const APP_ENV_REL_PATH = ".grok/app-env.json";
+
+/**
+ * On Windows, batch files (.cmd, .bat) and commands resolved to them (like `vite`
+ * installed in `node_modules/.bin/vite.cmd`) require `shell: true` to execute.
+ * Direct executables (.exe) must not use `shell: true` to avoid cmd.exe quoting issues.
+ */
+export function needsShellOnWindows(command, env = process.env) {
+  if (process.platform !== "win32") return false;
+  const lower = command.toLowerCase();
+  if (lower.endsWith(".cmd") || lower.endsWith(".bat")) return true;
+  if (lower.endsWith(".exe") || lower.endsWith(".com")) return false;
+
+  if (existsSync(command)) return false;
+
+  const pathEnv = env.PATH || env.Path || "";
+  const dirs = pathEnv.split(";").filter(Boolean);
+  const pathExt = (process.env.PATHEXT || ".COM;.EXE;.BAT;.CMD").split(";").filter(Boolean);
+
+  for (const dir of dirs) {
+    for (const ext of pathExt) {
+      const targetLower = join(dir, command + ext.toLowerCase());
+      if (existsSync(targetLower)) {
+        return /\.(cmd|bat)$/i.test(targetLower);
+      }
+      const targetUpper = join(dir, command + ext.toUpperCase());
+      if (existsSync(targetUpper)) {
+        return /\.(cmd|bat)$/i.test(targetUpper);
+      }
+    }
+  }
+
+  return true;
+}
 
 const VITE_PREFIX = "VITE_";
 
@@ -110,8 +143,24 @@ function main(argv) {
     console.error("usage: node scripts/with-app-env.mjs <command> [args…]");
     process.exit(2);
   }
-  const env = mergeAppEnv(readAppEnv(projectRoot()), process.env);
-  const child = spawn(command, args, { stdio: "inherit", env });
+  const root = projectRoot();
+  const env = mergeAppEnv(readAppEnv(root), process.env);
+  const localBin = join(root, "node_modules", ".bin");
+  const pathSep = process.platform === "win32" ? ";" : ":";
+  const currentPath = env.PATH || env.Path || "";
+  if (!currentPath.split(pathSep).includes(localBin)) {
+    const updatedPath = `${localBin}${pathSep}${currentPath}`;
+    env.PATH = updatedPath;
+    if (process.platform === "win32") {
+      env.Path = updatedPath;
+    }
+  }
+
+  const child = spawn(command, args, {
+    stdio: "inherit",
+    env,
+    shell: needsShellOnWindows(command, env),
+  });
   // The dev server is long-running and is stopped by signalling this wrapper.
   for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"]) {
     process.on(signal, () => child.kill(signal));

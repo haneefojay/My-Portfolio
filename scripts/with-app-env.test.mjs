@@ -8,6 +8,7 @@ import { promisify } from "node:util";
 import {
   APP_ENV_REL_PATH,
   mergeAppEnv,
+  needsShellOnWindows,
   parseAppEnv,
   projectRoot,
   readAppEnv,
@@ -113,16 +114,31 @@ test("a signal-killed command is never reported as success", async () => {
   );
 });
 
-test("the CLI still runs when invoked through a symlinked path", async () => {
-  // node realpaths import.meta.url but not process.argv[1], so a raw comparison
-  // turns the wrapper into a no-op that exits 0 without starting anything.
-  const link = join(mkdtempSync(join(tmpdir(), "app-env-link-")), "scripts");
-  symlinkSync(join(projectRoot(), "scripts"), link);
-  const { stdout } = await execFileAsync(process.execPath, [
-    join(link, "with-app-env.mjs"),
-    process.execPath,
-    "-e",
-    PRINT_FLAG,
-  ]);
-  assert.equal(stdout, "false");
+test("detects whether commands require shell execution on Windows", () => {
+  if (process.platform === "win32") {
+    assert.equal(needsShellOnWindows("vite.cmd"), true);
+    assert.equal(needsShellOnWindows("build.bat"), true);
+    assert.equal(needsShellOnWindows(process.execPath), false);
+    assert.equal(needsShellOnWindows("node.exe"), false);
+  } else {
+    assert.equal(needsShellOnWindows("vite"), false);
+  }
 });
+
+test(
+  "the CLI still runs when invoked through a symlinked path",
+  { skip: process.platform === "win32" },
+  async () => {
+    // node realpaths import.meta.url but not process.argv[1], so a raw comparison
+    // turns the wrapper into a no-op that exits 0 without starting anything.
+    const link = join(mkdtempSync(join(tmpdir(), "app-env-link-")), "scripts");
+    symlinkSync(join(projectRoot(), "scripts"), link);
+    const { stdout } = await execFileAsync(process.execPath, [
+      join(link, "with-app-env.mjs"),
+      process.execPath,
+      "-e",
+      PRINT_FLAG,
+    ]);
+    assert.equal(stdout, "false");
+  },
+);
