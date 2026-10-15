@@ -107,7 +107,7 @@ export const projects = [
       "Docker",
       "Turborepo",
     ],
-    status: "Private · in development",
+    status: "Live",
     links: [
       {
         label: "Website",
