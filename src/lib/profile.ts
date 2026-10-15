@@ -88,7 +88,7 @@ export const projects = [
     id: "examkeep",
     title: "ExamKeep",
     kind: "CBT platform",
-    role: "Lead Software Engineer",
+    role: "Founder & Lead Engineer",
     problem:
       "A production CBT platform for Nigerian secondary schools, built for modest lab hardware and unstable networks: multi-tenant school management, a versioned question bank with HOD review, batched exam sittings, live exam-day monitoring, offline answer persistence, and audited result publishing.",
     work: "Owned system architecture and implementation across the backend, database design, authentication, tenant isolation, background processing, API contracts, validation, frontend architecture, and production infrastructure.",
