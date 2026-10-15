@@ -7,7 +7,7 @@ Live positioning: **Senior Software Engineer** at MushakTech Ventures — backen
 ## What’s on the site
 
 - Home — link-in-bio landing with avatar, bio, featured links, socials, and light/dark theme
-- Selected work — Project Atlas, EnvDoctor, Pulse News Aggregator
+- Selected work — ExamKeep, EnvDoctor, Pulse News Aggregator
 - Experience — MushakTech Ventures
 - Skills — languages, backend/systems, frontend, AI, infrastructure, databases
 - Resume — on-page preview plus downloadable PDF

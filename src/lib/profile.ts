@@ -85,12 +85,12 @@ export const socialLinks: Array<{
 
 export const projects = [
   {
-    id: "atlas",
-    title: "Project Atlas",
+    id: "examkeep",
+    title: "ExamKeep",
     kind: "CBT platform",
     role: "Lead Software Engineer",
     problem:
-      "A production CBT platform for Nigerian secondary schools: multi-tenant school management, exam delivery, question workflows, moderation, role-based access, and exam integrity.",
+      "A production CBT platform for Nigerian secondary schools, built for modest lab hardware and unstable networks: multi-tenant school management, a versioned question bank with HOD review, batched exam sittings, live exam-day monitoring, offline answer persistence, and audited result publishing.",
     work: "Owned system architecture and implementation across the backend, database design, authentication, tenant isolation, background processing, API contracts, validation, frontend architecture, and production infrastructure.",
     outcome:
       "Built as a production-oriented platform for deployment and pilot use in secondary schools.",
@@ -108,7 +108,12 @@ export const projects = [
       "Turborepo",
     ],
     status: "Private · in development",
-    links: [] as Array<{ label: string; href: string }>,
+    links: [
+      {
+        label: "Website",
+        href: "https://examkeep.com",
+      },
+    ],
   },
   {
     id: "envdoctor",
